@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Log;
 use Illuminate\Http\Request;
 use App\Helpers\ImageUploadHelper;
 
@@ -20,22 +21,32 @@ class ImageUploadController extends Controller {
     */
 
     public function store( Request $request ) {
-        // Validate image input
+        \Log::info( 'Upload request received.' );
+
         $request->validate( [
             'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ] );
 
-        // Upload image using the helper
-        $imagePath = ImageUploadHelper::uploadImage( $request->file( 'image' ), 'uploads/images', 'public' );
+        if ( !$request->hasFile( 'image' ) ) {
+            Log::error( 'No file found in request.' );
+            return back()->with( 'error', 'No file uploaded.' );
+        }
+
+        $file = $request->file( 'image' );
+
+        if ( !$file->isValid() ) {
+            \Log::error( 'Uploaded file is not valid.' );
+            return back()->with( 'error', 'Uploaded file is not valid.' );
+        }
+
+        $imagePath = ImageUploadHelper::uploadImage( $file );
 
         if ( !$imagePath ) {
+            \Log::error( 'Image upload failed in helper.' );
             return back()->with( 'error', 'Image upload failed.' );
         }
 
-        // Optionally save to DB ( example )
-        // $user = auth()->user();
-        // $user->profile_image = $imagePath;
-        // $user->save();
+        \Log::info( 'Image uploaded successfully: ' . $imagePath );
 
         return back()->with( 'success', 'Image uploaded successfully.' )->with( 'imagePath', $imagePath );
     }
