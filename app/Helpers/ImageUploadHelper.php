@@ -16,14 +16,23 @@ class ImageUploadHelper {
     * @param string|null $customName
     * @return string|false
     */
-    public static function uploadImage( UploadedFile $image, string $path = 'uploads/images', string $disk = 'public', string $customName = null ) {
+    public static function uploadImage( UploadedFile $image, string $path = 'uploads/images', string $customName = null ) {
         if ( !$image->isValid() ) {
             return false;
         }
 
         $filename = $customName ?: Str::random( 20 ) . '.' . $image->getClientOriginalExtension();
 
-        return $image->storeAs( $path, $filename, $disk );
+        $destinationPath = public_path( $path );
+
+        if ( !file_exists( $destinationPath ) ) {
+            mkdir( $destinationPath, 0755, true );
+        }
+
+        $image->move( $destinationPath, $filename );
+
+        return $path . '/' . $filename;
+        // relative to public folder
     }
 
     /**
