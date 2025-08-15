@@ -49,7 +49,7 @@ class ImageUploadHelper {
 
         $image->move( $destinationPath, $filename );
 
-        return $path . '/' . $filename;
+        return 'public/' . $path . '/' . $filename;
         // Adjust this if needed based on your URL structure
     }
 
