@@ -9,7 +9,7 @@
 
     @if (session('success'))
         <p style="color: green;">{{ session('success') }}</p>
-        <img src="{{ asset('storage/' . session('imagePath')) }}" width="200" alt="Uploaded Image">
+        <img src="{{ asset(session('imagePath')) }}" width="200" alt="Uploaded Image">
     @endif
 
     @if (session('error'))
