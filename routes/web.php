@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\SliderController;
 use App\Http\Controllers\ImageUploadController;
 
 /*
@@ -20,3 +21,8 @@ Route::get('/', function () {
 
 Route::get('/upload-image', [ImageUploadController::class, 'create'])->name('image.upload.create');
 Route::post('/upload-image', [ImageUploadController::class, 'store'])->name('image.upload.store');
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::resource('sliders', SliderController::class);
