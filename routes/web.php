@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ImageUploadController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,3 +17,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/upload-image', [ImageUploadController::class, 'create'])->name('image.upload.create');
+Route::post('/upload-image', [ImageUploadController::class, 'store'])->name('image.upload.store');
