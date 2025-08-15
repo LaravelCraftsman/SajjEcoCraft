@@ -31,7 +31,7 @@ class ImageUploadHelper {
 
         $image->move( $destinationPath, $filename );
 
-        return $path . '/' . $filename;
+        return 'public/' . $path . '/' . $filename;
         // relative to public folder
     }
 
