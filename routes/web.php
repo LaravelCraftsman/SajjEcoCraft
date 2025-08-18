@@ -26,3 +26,6 @@ Auth::routes();
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::resource('sliders', SliderController::class);
+Route::get('/upload-form', function () {
+    return view('tutorial.upload');
+});
