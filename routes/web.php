@@ -10,6 +10,7 @@ use App\Http\Controllers\CouponController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\ImageUploadController;
+use App\Http\Controllers\ContactRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -63,3 +64,4 @@ Route::resource('faqs',FaqController::class);
 
 
     Route::resource('coupons', CouponController::class);
+Route::resource('contactRequests', ContactRequestController::class);
