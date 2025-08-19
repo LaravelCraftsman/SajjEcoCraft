@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StaffController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\ImageUploadController;
 
@@ -29,3 +30,6 @@ Route::resource('sliders', SliderController::class);
 Route::get('/upload-form', function () {
     return view('tutorial.upload');
 });
+
+
+Route::resource('staff', StaffController::class);

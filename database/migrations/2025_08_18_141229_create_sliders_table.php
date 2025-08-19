@@ -15,19 +15,16 @@ return new class extends Migration
     {
         Schema::create('sliders', function (Blueprint $table) {
             $table->id();
-            $table->string('title')->default('SajjEcoCraft');           // Title of the slider
-            $table->string('description')->default('SajjEcoCraft');     // Description of the slider
-            $table->string('tag')->default('SajjEcoCraft');             // Tag for the slider
-            $table->string('cta_label')->default('SajjEcoCraft');       // Call-to-action button label
+            $table->string('title')->default('SajjEcoCraft'); // Title of the slider
+            $table->string('description')->default('SajjEcoCraft'); // Description of the slider
+            $table->string('tag')->default('SajjEcoCraft'); // Tag for the slider
+            $table->string('cta_label')->default('SajjEcoCraft'); // Call-to-action button label
             $table->string('cta_url')->default('https://www.google.com'); // URL for the CTA button
-            $table->string('image')->nullable();                         // Path to the slider image (nullable)
-            $table->enum('status', ['active', 'inactive'])->default('inactive');  // Status
+            $table->string('image')->nullable(); // Path to the slider image (nullable)
+            $table->string('status'); // Status to indicate if the slider is active or inactive
             $table->timestamps();
-            $table->softDeletes();      
         });
     }
-
-    
 
     /**
      * Reverse the migrations.
