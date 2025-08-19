@@ -6,6 +6,7 @@ use App\Http\Controllers\BlogController;
 use App\Http\Controllers\StaffController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\BranchController;
+use App\Http\Controllers\CouponController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\AboutUsController;
 use App\Http\Controllers\ImageUploadController;
@@ -59,3 +60,6 @@ Route::resource('faqs',FaqController::class);
 
     Route::get('about_us', [AboutUsController::class, 'index'])->name('about_us');
     Route::post('update_about_us', [AboutUsController::class, 'store'])->name('update_about_us');
+
+
+    Route::resource('coupons', CouponController::class);

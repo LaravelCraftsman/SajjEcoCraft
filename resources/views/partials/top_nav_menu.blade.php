@@ -14,7 +14,7 @@
         <a class="dropdown-item" href="{{ route('faqs.index') }}">FAQ</a>
         <a class="dropdown-item" href="{{ route('banners') }}">Banners</a>
         <a class="dropdown-item" href="{{ route('about_us') }}">About Us</a>
-        <a class="dropdown-item" href="#">Coupons</a>
+        <a class="dropdown-item" href="{{ route('coupons.index') }}">Coupons</a>
         <a class="dropdown-item" href="#">Contact
             Request</a>
         <a class="dropdown-item" href="#">Site Settings</a>
