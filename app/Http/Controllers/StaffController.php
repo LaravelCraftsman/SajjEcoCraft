@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use App\Exports\StaffExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StaffController extends Controller {
     /**
@@ -138,5 +140,9 @@ class StaffController extends Controller {
         $user->delete();
 
         return redirect()->route( 'staff.index' )->with( 'status', 'Staff user deleted successfully!' );
+    }
+
+    public function export() {
+        return Excel::download( new StaffExport, 'staff-users.xlsx' );
     }
 }

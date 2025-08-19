@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Staff')
+
 @section('content')
     <div class="container">
         <div class="row justify-content-center">
@@ -9,6 +11,12 @@
 
                         <a href="{{ route('staff.create') }}" class="btn btn-primary btn-sm" style="float:right;">Create
                             Staff</a>
+
+                        <a href="{{ route('staff.export') }}" class="btn btn-success btn-sm"
+                            style="float:right; margin-right: 10px;">
+                            Export Staff
+                        </a>
+
 
                     </div>
 
