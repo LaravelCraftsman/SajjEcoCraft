@@ -8,8 +8,13 @@ use App\Http\Controllers\BannerController;
 use App\Http\Controllers\BranchController;
 use App\Http\Controllers\CouponController;
 use App\Http\Controllers\SliderController;
+use App\Http\Controllers\VendorController;
 use App\Http\Controllers\AboutUsController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\ImageUploadController;
+use App\Http\Controllers\SiteSettingsController;
 use App\Http\Controllers\ContactRequestController;
 
 /*
@@ -38,14 +43,8 @@ Route::get('/upload-form', function () {
     return view('tutorial.upload');
 });
 
-
-
-
-
 Route::get('/staff/export', [StaffController::class, 'export'])->name('staff.export');
-
 Route::resource('staff', StaffController::class);
-
 
 Route::resource('branches', BranchController::class);
 
@@ -53,15 +52,27 @@ Route::resource('branches', BranchController::class);
 Route::post('blogs/upload', [App\Http\Controllers\BlogController::class, 'uploadImage'])->name('blogs.upload');
 Route::resource('blogs', BlogController::class);
 
-
 Route::resource('faqs',FaqController::class);
-    Route::get('banners', [BannerController::class, 'index'])->name('banners');
-    Route::post('update_about_banner', [BannerController::class, 'updateAbout'])->name('update_about_banner');
-    Route::post('update_blog_banner', [BannerController::class, 'updateBlog'])->name('update_blog_banner');
+Route::get('banners', [BannerController::class, 'index'])->name('banners');
+Route::post('update_about_banner', [BannerController::class, 'updateAbout'])->name('update_about_banner');
+Route::post('update_blog_banner', [BannerController::class, 'updateBlog'])->name('update_blog_banner');
 
-    Route::get('about_us', [AboutUsController::class, 'index'])->name('about_us');
-    Route::post('update_about_us', [AboutUsController::class, 'store'])->name('update_about_us');
+Route::get('about_us', [AboutUsController::class, 'index'])->name('about_us');
+Route::post('update_about_us', [AboutUsController::class, 'store'])->name('update_about_us');
 
-
-    Route::resource('coupons', CouponController::class);
+Route::resource('coupons', CouponController::class);
 Route::resource('contactRequests', ContactRequestController::class);
+
+Route::resource('site_settings',SiteSettingsController::class);
+Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
+Route::resource('customers',CustomerController::Class);
+Route::resource('vendors', VendorController::class);
+Route::resource('categories',CategoryController::class);
+
+// Product image handling routes
+Route::post('/products/upload-image', [ProductsController::class, 'uploadImage'])->name('products.upload-image');
+Route::post('/products/delete-image', [ProductsController::class, 'deleteImage'])->name('products.delete-image');
+Route::delete('/products/{product}/images', [ProductsController::class, 'removeImage'])->name('products.images.remove');
+Route::get('/categories/{id}/pdf', [CategoryController::class, 'downloadPdf'])->name('categories.pdf');
+
+Route::resource('products', ProductsController::class);

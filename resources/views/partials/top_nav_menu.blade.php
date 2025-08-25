@@ -17,7 +17,7 @@
         <a class="dropdown-item" href="{{ route('coupons.index') }}">Coupons</a>
         <a class="dropdown-item" href="{{ route('contactRequests.index') }}">Contact
             Request</a>
-        <a class="dropdown-item" href="#">Site Settings</a>
+        <a class="dropdown-item" href="{{ route('site_settings.index') }}">Site Settings</a>
     </div>
 </li>
 <li class="nav-item dropdown">
@@ -27,7 +27,7 @@
     </a>
 
     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-        <a class="dropdown-item" href="#">Customers</a>
+        <a class="dropdown-item" href="{{ route('customers.index') }}">Customers</a>
         <a class="dropdown-item" href="{{ route('staff.index') }}">Staff</a>
     </div>
 </li>
@@ -39,10 +39,10 @@
 
     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
         {{-- <a class="dropdown-item" href="{{route('brands.index')}}">Brands</a> --}}
-        <a class="dropdown-item" href="#">Vendors</a>
-        <a class="dropdown-item" href="#">Category</a>
+        <a class="dropdown-item" href="{{ route('vendors.index') }}">Vendors</a>
+        <a class="dropdown-item" href="{{ route('categories.index') }}">Category</a>
         {{-- <a class="dropdown-item" href="{{route('subcategory.index')}}">Subcategory</a> --}}
-        <a class="dropdown-item" href="#">Products</a>
+        <a class="dropdown-item" href="{{ route('products.index') }}">Products</a>
     </div>
 </li>
 <li class="nav-item dropdown">
