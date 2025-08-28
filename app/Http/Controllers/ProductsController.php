@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\ImageUploadHelper;
-use App\Models\Category;
-use App\Models\Product;
 use App\Models\Vendor;
+use App\Models\Product;
+use App\Models\Category;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Helpers\ImageUploadHelper;
+use Milon\Barcode\DNS1D;
+use Milon\Barcode\DNS2D;
 
 class ProductsController extends Controller {
     /**
@@ -39,82 +42,176 @@ class ProductsController extends Controller {
     * @return \Illuminate\Http\Response
     */
 
-    public function store( Request $request ) {
-        // dd( $request );
-        // Validate inputs
-        $request->validate( [
-            'name'              => 'required|string|max:255|unique:products,name',
-            'description'       => 'nullable|string',
-            'short_description' => 'nullable|string',
-            'sku'               => 'required|string|unique:products,sku',
-            'status'            => 'required|in:active,inactive,draft',
-            'stock'             => 'nullable|integer|min:0',
-            'purchase_price'    => 'required|numeric|min:0',
-            'selling_price'     => 'required|numeric|min:0',
-            'discounted_price'  => 'nullable|numeric|min:0',
-            'category_id'       => 'nullable|exists:categories,id',
-            'vendor_id'         => 'nullable|exists:vendors,id',
-            'images.*'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'main_image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'meta_description'  => 'nullable|string|max:255',
-            'meta_keywords'     => 'nullable|string|max:255',
-            'og_title'          => 'nullable|string|max:255',
-            'og_description'    => 'nullable|string',
-            'og_image'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'twitter_title'     => 'nullable|string|max:255',
-            'twitter_description'=> 'nullable|string',
-            'twitter_image'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ] );
+    // public function store( Request $request ) {
+    //     // dd( $request );
+    //     // Validate inputs
+    //     $request->validate( [
+    //         'name'              => 'required|string|max:255|unique:products,name',
+    //         'description'       => 'nullable|string',
+    //         'short_description' => 'nullable|string',
+    //         'sku'               => 'required|string|unique:products,sku',
+    //         'status'            => 'required|in:active,inactive,draft',
+    //         'stock'             => 'nullable|integer|min:0',
+    //         'purchase_price'    => 'required|numeric|min:0',
+    //         'selling_price'     => 'required|numeric|min:0',
+    //         'discounted_price'  => 'nullable|numeric|min:0',
+    //         'category_id'       => 'nullable|exists:categories,id',
+    //         'vendor_id'         => 'nullable|exists:vendors,id',
+    //         'images.*'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //         'main_image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //         'meta_description'  => 'nullable|string|max:255',
+    //         'meta_keywords'     => 'nullable|string|max:255',
+    //         'og_title'          => 'nullable|string|max:255',
+    //         'og_description'    => 'nullable|string',
+    //         'og_image'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //         'twitter_title'     => 'nullable|string|max:255',
+    //         'twitter_description'=> 'nullable|string',
+    //         'twitter_image'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+    //     ] );
 
-        $product = new Product();
+    //     $product = new Product();
 
-        $product->name = $request->name;
-        $product->description = $request->description;
-        $product->short_description = $request->short_description;
-        $product->sku = $request->sku;
-        $product->status = $request->status;
-        $product->stock = $request->stock ?? null;
-        $product->purchase_price = $request->purchase_price;
-        $product->selling_price = $request->selling_price;
-        $product->discounted_price = $request->discounted_price ?? null;
-        $product->category_id = $request->category_id ?? null;
-        $product->vendor_id = $request->vendor_id ?? null;
-        $product->meta_description = $request->meta_description;
-        $product->meta_keywords = $request->meta_keywords;
-        $product->og_title = $request->og_title;
-        $product->og_description = $request->og_description;
-        $product->twitter_title = $request->twitter_title;
-        $product->twitter_description = $request->twitter_description;
+    //     $product->name = $request->name;
+    //     $product->description = $request->description;
+    //     $product->short_description = $request->short_description;
+    //     $product->sku = $request->sku;
+    //     $product->status = $request->status;
+    //     $product->stock = $request->stock ?? null;
+    //     $product->purchase_price = $request->purchase_price;
+    //     $product->selling_price = $request->selling_price;
+    //     $product->discounted_price = $request->discounted_price ?? null;
+    //     $product->category_id = $request->category_id ?? null;
+    //     $product->vendor_id = $request->vendor_id ?? null;
+    //     $product->meta_description = $request->meta_description;
+    //     $product->meta_keywords = $request->meta_keywords;
+    //     $product->og_title = $request->og_title;
+    //     $product->unique_id = $request->unique_id;
+    //     $product->pinned = $request->pinned;
+    //     $product->size = $request->size;
+    //     $product->og_description = $request->og_description;
+    //     $product->twitter_title = $request->twitter_title;
+    //     $product->twitter_description = $request->twitter_description;
 
-        // Upload OG image if present
-        if ( $request->hasFile( 'og_image' ) ) {
-            $product->og_image = ImageUploadHelper::upload( $request->file( 'og_image' ), 'products/og_images' );
-        }
+    //     // Upload OG image if present
+    //     if ( $request->hasFile( 'og_image' ) ) {
+    //         $product->og_image = ImageUploadHelper::upload( $request->file( 'og_image' ), 'products/og_images' );
+    //     }
 
-        // Upload Twitter image if present
-        if ( $request->hasFile( 'twitter_image' ) ) {
-            $product->twitter_image = ImageUploadHelper::upload( $request->file( 'twitter_image' ), 'products/twitter_images' );
-        }
+    //     // Upload Twitter image if present
+    //     if ( $request->hasFile( 'twitter_image' ) ) {
+    //         $product->twitter_image = ImageUploadHelper::upload( $request->file( 'twitter_image' ), 'products/twitter_images' );
+    //     }
 
-        // Upload main image if present
-        if ( $request->hasFile( 'main_image' ) ) {
-            $product->main_image = ImageUploadHelper::upload( $request->file( 'main_image' ), 'products/main_images' );
-        }
+    //     // Upload main image if present
+    //     if ( $request->hasFile( 'main_image' ) ) {
+    //         $product->main_image = ImageUploadHelper::upload( $request->file( 'main_image' ), 'products/main_images' );
+    //     }
 
-        // Handle multiple images upload
-        $images = [];
-        if ( $request->hasFile( 'images' ) ) {
-            foreach ( $request->file( 'images' ) as $image ) {
-                $images[] = ImageUploadHelper::upload( $image, 'products/images' );
-            }
-        }
-        $product->images = $images;
+    //     // Handle multiple images upload
+    //     $images = [];
+    //     if ( $request->hasFile( 'images' ) ) {
+    //         foreach ( $request->file( 'images' ) as $image ) {
+    //             $images[] = ImageUploadHelper::upload( $image, 'products/images' );
+    //         }
+    //     }
+    //     $product->images = $images;
 
-        $product->save();
+    //     $product->save();
 
-        return redirect()->route( 'products.index' )->with( 'success', 'Product created successfully.' );
+    //     return redirect()->route( 'products.index' )->with( 'success', 'Product created successfully.' );
+    // }
+public function store(Request $request) {
+    // Validate inputs
+    $request->validate([
+        'name' => 'required|string|max:255|unique:products,name',
+        'slug' => 'nullable|string|max:255|unique:products,slug',
+        'unique_id' => 'required|string|unique:products,unique_id',
+        'size' => 'nullable|string|max:100',
+        'description' => 'nullable|string',
+        'short_description' => 'nullable|string',
+        'sku' => 'required|string|unique:products,sku',
+        'status' => 'required|in:active,inactive,draft',
+        'stock' => 'nullable|integer|min:0',
+        'purchase_price' => 'required|numeric|min:0',
+        'selling_price' => 'required|numeric|min:0',
+        'category_id' => 'nullable|exists:categories,id',
+        'vendor_id' => 'nullable|exists:vendors,id',
+        'vendor_charges' => 'nullable|numeric|min:0',
+        'pinned' => 'required|boolean',
+        'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'meta_description' => 'nullable|string|max:255',
+        'meta_keywords' => 'nullable|string|max:255',
+        'og_title' => 'nullable|string|max:255',
+        'og_description' => 'nullable|string',
+        'og_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'twitter_title' => 'nullable|string|max:255',
+        'twitter_description' => 'nullable|string',
+        'twitter_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+    ]);
+
+    $product = new Product();
+
+    // Basic Info
+    $product->name = $request->name;
+    $product->slug = $request->slug ?: Str::slug($request->name);
+    $product->description = $request->description;
+    $product->short_description = $request->short_description;
+    $product->unique_id = $request->unique_id;
+    $product->pinned = $request->pinned;
+    $product->size = $request->size;
+
+    // Inventory & Pricing
+    $product->sku = $request->sku;
+    $product->status = $request->status;
+    $product->stock = $request->stock ?? 0;
+    $product->purchase_price = $request->purchase_price;
+    $product->profit = $request->profit_amount ?? 0;
+    $product->discount = $request->discount_amount ?? 0;
+    $product->selling_price = $request->selling_price;
+
+    // Relationships
+    $product->category_id = $request->category_id;
+    $product->vendor_id = $request->vendor_id;
+
+    // SEO
+    $product->meta_description = $request->meta_description;
+    $product->meta_keywords = $request->meta_keywords;
+
+    // Social Media
+    $product->og_title = $request->og_title;
+    $product->og_description = $request->og_description;
+    $product->twitter_title = $request->twitter_title;
+    $product->twitter_description = $request->twitter_description;
+
+    // Upload main image if present
+    if ($request->hasFile('main_image')) {
+        $product->main_image = ImageUploadHelper::upload($request->file('main_image'), 'products/main_images');
     }
 
+    // Upload OG image if present
+    if ($request->hasFile('og_image')) {
+        $product->og_image = ImageUploadHelper::upload($request->file('og_image'), 'products/og_images');
+    }
+
+    // Upload Twitter image if present
+    if ($request->hasFile('twitter_image')) {
+        $product->twitter_image = ImageUploadHelper::upload($request->file('twitter_image'), 'products/twitter_images');
+    }
+
+    // Handle multiple images upload
+    $images = [];
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $images[] = ImageUploadHelper::upload($image, 'products/images');
+        }
+    }
+    $product->images = !empty($images) ? $images : null;
+
+    $product->save();
+
+    return redirect()->route('products.index')->with('success', 'Product created successfully.');
+}
     /**
     * Display the specified resource.
     *
@@ -156,75 +253,94 @@ class ProductsController extends Controller {
         $product = Product::findOrFail( $id );
 
         // Validate inputs
-        $request->validate( [
-            'name'              => 'required|string|max:255|unique:products,name,' . $product->id,
-            'description'       => 'nullable|string',
-            'short_description' => 'nullable|string',
-            'sku'               => 'required|string|unique:products,sku,' . $product->id,
-            'status'            => 'required|in:active,inactive,draft',
-            'stock'             => 'nullable|integer|min:0',
-            'purchase_price'    => 'required|numeric|min:0',
-            'selling_price'     => 'required|numeric|min:0',
-            'discounted_price'  => 'nullable|numeric|min:0',
-            'category_id'       => 'nullable|exists:categories,id',
-            'vendor_id'         => 'nullable|exists:vendors,id',
-            'images.*'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'main_image'        => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'meta_description'  => 'nullable|string|max:255',
-            'meta_keywords'     => 'nullable|string|max:255',
-            'og_title'          => 'nullable|string|max:255',
-            'og_description'    => 'nullable|string',
-            'og_image'          => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'twitter_title'     => 'nullable|string|max:255',
-            'twitter_description'=> 'nullable|string',
-            'twitter_image'     => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-        ] );
+    $request->validate([
+        'name' => 'required|string|max:255',
+        'slug' => 'nullable|string|max:255',
+        'unique_id' => 'required|string',
+        'size' => 'nullable|string|max:100',
+        'description' => 'nullable|string',
+        'short_description' => 'nullable|string',
+        'sku' => 'required|string',
+        'status' => 'required|in:active,inactive,draft',
+        'stock' => 'nullable|integer|min:0',
+        'purchase_price' => 'required|numeric|min:0',
+        'selling_price' => 'required|numeric|min:0',
+        'category_id' => 'nullable|exists:categories,id',
+        'vendor_id' => 'nullable|exists:vendors,id',
+        'vendor_charges' => 'nullable|numeric|min:0',
+        'pinned' => 'required|boolean',
+        'images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'main_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'meta_description' => 'nullable|string|max:255',
+        'meta_keywords' => 'nullable|string|max:255',
+        'og_title' => 'nullable|string|max:255',
+        'og_description' => 'nullable|string',
+        'og_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+        'twitter_title' => 'nullable|string|max:255',
+        'twitter_description' => 'nullable|string',
+        'twitter_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+    ]);
 
-        $product->name = $request->name;
-        $product->description = $request->description;
-        $product->short_description = $request->short_description;
-        $product->sku = $request->sku;
-        $product->status = $request->status;
-        $product->stock = $request->stock ?? null;
-        $product->purchase_price = $request->purchase_price;
-        $product->selling_price = $request->selling_price;
-        $product->discounted_price = $request->discounted_price ?? null;
-        $product->category_id = $request->category_id ?? null;
-        $product->vendor_id = $request->vendor_id ?? null;
-        $product->meta_description = $request->meta_description;
-        $product->meta_keywords = $request->meta_keywords;
-        $product->og_title = $request->og_title;
-        $product->og_description = $request->og_description;
-        $product->twitter_title = $request->twitter_title;
-        $product->twitter_description = $request->twitter_description;
 
-        // Upload OG image if present
-        if ( $request->hasFile( 'og_image' ) ) {
-            $product->og_image = ImageUploadHelper::upload( $request->file( 'og_image' ), 'products/og_images' );
+    // Basic Info
+    $product->name = $request->name;
+    $product->slug = $request->slug ?: Str::slug($request->name);
+    $product->description = $request->description;
+    $product->short_description = $request->short_description;
+    $product->unique_id = $request->unique_id;
+    $product->pinned = $request->pinned;
+    $product->size = $request->size;
+
+    // Inventory & Pricing
+    $product->sku = $request->sku;
+    $product->status = $request->status;
+    $product->stock = $request->stock ?? 0;
+    $product->purchase_price = $request->purchase_price;
+    $product->profit = $request->profit_amount ?? 0;
+    $product->discount = $request->discount_amount ?? 0;
+    $product->selling_price = $request->selling_price;
+
+    // Relationships
+    $product->category_id = $request->category_id;
+    $product->vendor_id = $request->vendor_id;
+
+    // SEO
+    $product->meta_description = $request->meta_description;
+    $product->meta_keywords = $request->meta_keywords;
+
+    // Social Media
+    $product->og_title = $request->og_title;
+    $product->og_description = $request->og_description;
+    $product->twitter_title = $request->twitter_title;
+    $product->twitter_description = $request->twitter_description;
+
+    // Upload main image if present
+    if ($request->hasFile('main_image')) {
+        $product->main_image = ImageUploadHelper::upload($request->file('main_image'), 'products/main_images');
+    }
+
+    // Upload OG image if present
+    if ($request->hasFile('og_image')) {
+        $product->og_image = ImageUploadHelper::upload($request->file('og_image'), 'products/og_images');
+    }
+
+    // Upload Twitter image if present
+    if ($request->hasFile('twitter_image')) {
+        $product->twitter_image = ImageUploadHelper::upload($request->file('twitter_image'), 'products/twitter_images');
+    }
+
+    // Handle multiple images upload
+    $images = [];
+    if ($request->hasFile('images')) {
+        foreach ($request->file('images') as $image) {
+            $images[] = ImageUploadHelper::upload($image, 'products/images');
         }
+    }
+    $product->images = !empty($images) ? $images : null;
 
-        // Upload Twitter image if present
-        if ( $request->hasFile( 'twitter_image' ) ) {
-            $product->twitter_image = ImageUploadHelper::upload( $request->file( 'twitter_image' ), 'products/twitter_images' );
-        }
+    $product->save();
 
-        // Upload main image if present
-        if ( $request->hasFile( 'main_image' ) ) {
-            $product->main_image = ImageUploadHelper::upload( $request->file( 'main_image' ), 'products/main_images' );
-        }
-
-        // Handle additional images upload ( append to existing images )
-        $images = $product->images ?? [];
-        if ( $request->hasFile( 'images' ) ) {
-            foreach ( $request->file( 'images' ) as $image ) {
-                $images[] = ImageUploadHelper::upload( $image, 'products/images' );
-            }
-        }
-        $product->images = $images;
-
-        $product->save();
-
-        return redirect()->route( 'products.index' )->with( 'success', 'Product updated successfully.' );
+    return redirect()->route('products.index')->with('success', 'Product updated successfully.');
     }
 
     /**
@@ -278,34 +394,52 @@ class ProductsController extends Controller {
     * Handle image deletion via Dropzone
     */
 
-    public function deleteImage( Request $request ) {
-        $validator = Validator::make( $request->all(), [
-            'path' => 'required|string'
-        ] );
+    public function deleteImage(Request $request, Product $product)
+    {
+        $request->validate([
+            'image_url' => 'required|url',
+        ]);
 
-        if ( $validator->fails() ) {
-            return response()->json( [
-                'error' => $validator->errors()->first()
-            ], 422 );
+        $imageUrl = $request->input('image_url');
+
+        // Extract the relative path from the URL
+        // Assuming the URL contains '/storage/' and your files are stored in 'public'
+        $parsedUrl = parse_url($imageUrl, PHP_URL_PATH); // e.g. /storage/products/image.jpg
+
+        if (!$parsedUrl) {
+            return response()->json(['error' => 'Invalid image URL'], 400);
         }
 
-        try {
-            $path = $request->input( 'path' );
+        // Remove '/storage/' from the start to get relative path in storage/app/public
+        $relativePath = ltrim(str_replace('/storage/', '', $parsedUrl), '/');
 
-            // Check if the file exists and delete it
-            if ( Storage::disk( 'public' )->exists( $path ) ) {
-                Storage::disk( 'public' )->delete( $path );
-            }
-
-            return response()->json( [
-                'success' => true,
-                'message' => 'Image deleted successfully'
-            ] );
-        } catch ( \Exception $e ) {
-            return response()->json( [
-                'error' => 'Failed to delete image: ' . $e->getMessage()
-            ], 500 );
+        // Check if image exists in product images array
+        $images = $product->images;
+        if (!in_array($imageUrl, $images)) {
+            return response()->json(['error' => 'Image not found in product'], 404);
         }
+
+        // Remove the image URL from the images array
+        $updatedImages = array_filter($images, fn($img) => $img !== $imageUrl);
+        $product->images = array_values($updatedImages); // reindex array
+
+        // If the deleted image is the main_image, unset main_image
+        if ($product->main_image === $imageUrl) {
+            $product->main_image = null;
+        }
+
+        // Save the updated product
+        $product->save();
+
+        // Delete the image file from storage (public disk)
+        if (Storage::disk('public')->exists($relativePath)) {
+            Storage::disk('public')->delete($relativePath);
+        }
+
+        return response()->json([
+            'message' => 'Image deleted successfully',
+            'images' => $product->images,
+        ]);
     }
 
     /**
@@ -361,4 +495,57 @@ class ProductsController extends Controller {
             'message' => 'Image not found'
         ], 404);
     }
+
+
+
+
+public function downloadBarcode($uniqueId, $type)
+    {
+        $folder = public_path('barcodes');
+
+        // Create folder if it doesn't exist
+        if (!file_exists($folder)) {
+            mkdir($folder, 0755, true);
+        }
+
+        if ($type === 'qrcode') {
+            $fileName = $uniqueId . '_qrcode.png';
+            $filePath = $folder . '/' . $fileName;
+
+            if (!file_exists($filePath)) {
+                $dns2d = new DNS2D();
+
+                // Generate base64 PNG data
+                $pngData = $dns2d->getBarcodePNG($uniqueId, 'QRCODE', 10, 10);
+
+                // Save decoded data as PNG file
+                file_put_contents($filePath, base64_decode($pngData));
+            }
+
+            if (file_exists($filePath)) {
+                return response()->download($filePath);
+            }
+        }
+
+        if ($type === 'barcode') {
+            $fileName = $uniqueId . '_barcode.png';
+            $filePath = $folder . '/' . $fileName;
+
+            if (!file_exists($filePath)) {
+                $dns1d = new DNS1D();
+
+                $pngData = $dns1d->getBarcodePNG($uniqueId, 'PHARMA', 3, 50);
+
+                file_put_contents($filePath, base64_decode($pngData));
+            }
+
+            if (file_exists($filePath)) {
+                return response()->download($filePath);
+            }
+        }
+
+        abort(404, 'Barcode image not found or failed to generate');
+    }
+
+
 }

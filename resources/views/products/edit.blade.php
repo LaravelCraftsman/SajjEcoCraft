@@ -5,7 +5,20 @@
 @section('head')
     <!-- Font Awesome CDN (Free version) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        .delete-image-btn {
+            background: rgba(255, 0, 0, 0.7);
+            border: none;
+            padding: 2px 6px;
+            cursor: pointer;
+            z-index: 10;
+            border-radius: 50%;
+        }
 
+        .delete-image-btn:hover {
+            background: rgba(255, 0, 0, 1);
+        }
+    </style>
 @endsection
 @section('content')
     <div class="container-fluid">
@@ -13,7 +26,7 @@
             <div class="col-lg-10">
                 <div class="card shadow-sm border-0">
                     <div class="card-header py-3">
-                        <h5 class="mb-0"><i class="fas fa-edit me-2"></i>Edit Product: {{ $product->name }}</h5>
+                        <h5 class="mb-0">Edit Product: {{ $product->name }}</h5>
                     </div>
 
                     <div class="card-body p-4">
@@ -62,6 +75,29 @@
                                                 </div>
                                             </div>
 
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="unique_id" class="form-label">Unique Id</label>
+                                                    <input type="text" value="{{ $product->unique_id }}"
+                                                        class="form-control @error('unique_id') is-invalid @enderror"
+                                                        id="unique_id" name="unique_id" value="{{ old('unique_id') }}"
+                                                        required>
+                                                    @error('unique_id')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="size" class="form-label">Size</label>
+                                                    <textarea class="form-control @error('size') is-invalid @enderror" id="size" name="size" rows="3">{{$product->size}}</textarea>
+
+                                                    @error('size')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+
                                             <div class="mb-3">
                                                 <label for="short_description" class="form-label">Short Description</label>
                                                 <textarea class="form-control @error('short_description') is-invalid @enderror" id="short_description"
@@ -89,14 +125,142 @@
                                                 Inventory</h6>
                                         </div>
                                         <div class="card-body">
+                                            <div class="mb-3">
+                                                <label for="vendor_id" class="form-label">Vendor</label>
+                                                <select id="vendor_id"
+                                                    class="form-select @error('vendor_id') is-invalid @enderror"
+                                                    name="vendor_id">
+                                                    <option value="">Select Vendor</option>
+                                                    @foreach ($vendors as $vendor)
+                                                        <option value="{{ $vendor->id }}"
+                                                            data-parking="{{ $vendor->parking_charges ?? 0 }}"
+                                                            data-operational="{{ $vendor->operational_charges ?? 0 }}"
+                                                            data-transport="{{ $vendor->transport ?? 0 }}"
+                                                            data-deadstock="{{ $vendor->dead_stock ?? 0 }}"
+                                                            data-branding="{{ $vendor->branding ?? 0 }}"
+                                                            data-damage="{{ $vendor->damage_and_shrinkege ?? 0 }}"
+                                                            data-profit="{{ $vendor->profit ?? 0 }}"
+                                                            {{ old('vendor_id', $product->vendor_id) == $vendor->id ? 'selected' : '' }}>
+                                                            {{ $vendor->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('vendor_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <!-- Vendor Charges Breakdown (Hidden by default) -->
+                                            <div class="row" id="vendor_charges_breakdown" style="display: none;">
+                                                <div class="col-12">
+                                                    <div class="card bg-light border-0 mt-3">
+                                                        <div class="card-header bg-transparent py-2">
+                                                            <h6 class="mb-0 text-muted">
+                                                                <i class="fas fa-calculator me-1"></i>
+                                                                Vendor Charges Breakdown
+                                                            </h6>
+                                                        </div>
+                                                        <div class="card-body py-2">
+                                                            <div class="row g-2 text-sm">
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Parking:</small>
+                                                                    <div class="fw-bold" id="parking_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Operational:</small>
+                                                                    <div class="fw-bold" id="operational_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Transport:</small>
+                                                                    <div class="fw-bold" id="transport_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Dead Stock:</small>
+                                                                    <div class="fw-bold" id="deadstock_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Branding:</small>
+                                                                    <div class="fw-bold" id="branding_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Damage:</small>
+                                                                    <div class="fw-bold" id="damage_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Profit:</small>
+                                                                    <div class="fw-bold" id="profit_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <small class="text-muted">Total Vendor Charges:</small>
+                                                                    <div class="fw-bold text-primary"
+                                                                        id="total_vendor_charges_display">₹0</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Hidden field to store vendor charges -->
+                                            <input type="hidden" id="vendor_charges" name="vendor_charges"
+                                                value="{{ $product->vendor_charges ?? 0 }}">
+
+                                            <div class="row">
+                                                <div class="col-md-4 mb-4">
+                                                    <label for="purchase_price" class="form-label">Purchase Price
+                                                        (₹) <span class="text-danger">*</span></label>
+                                                    <input type="number" step="0.01"
+                                                        class="form-control @error('purchase_price') is-invalid @enderror"
+                                                        id="purchase_price" name="purchase_price"
+                                                        value="{{ $product->purchase_price }}" min="0"
+                                                        oninput="calculateFinalPrice()" required>
+                                                    @error('purchase_price')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+
+                                                <div class="col-md-4 mb-4">
+                                                    <label for="profit_amount" class="form-label">Profit (₹)</label>
+                                                    <input type="number" step="0.01" class="form-control"
+                                                        id="profit_amount" name="profit_amount"
+                                                        value="{{ $product->profit }}" oninput="calculateFinalPrice()">
+                                                    <div class="form-text">Additional profit amount</div>
+                                                </div>
+
+                                                <div class="col-md-4 mb-4">
+                                                    <label for="discount_amount" class="form-label">Discount (₹)</label>
+                                                    <input type="number" step="0.01" class="form-control"
+                                                        id="discount_amount" name="discount_amount"
+                                                        value="{{ $product->discount }}" oninput="calculateFinalPrice()">
+                                                    <div class="form-text">Discount amount</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 mb-12">
+                                                    <label for="selling_price" class="form-label">Final Selling Price (₹)
+                                                        <span class="text-danger">*</span></label>
+                                                    <input type="number" step="0.01"
+                                                        class="form-control @error('selling_price') is-invalid @enderror"
+                                                        id="selling_price" name="selling_price"
+                                                        value="{{ $product->selling_price }}" min="0" readonly
+                                                        style="background-color: #e3f2fd; font-weight: bold;" required>
+                                                    <div class="form-text">Auto-calculated: Purchase Price +
+                                                        Vendor Charges + Profit - Discount</div>
+                                                    @error('selling_price')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <br>
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
                                                     <label for="sku" class="form-label">SKU <span
                                                             class="text-danger">*</span></label>
                                                     <input type="text"
                                                         class="form-control @error('sku') is-invalid @enderror"
-                                                        id="sku" name="sku"
-                                                        value="{{ old('sku', $product->sku) }}" required>
+                                                        id="sku" name="sku" value="{{ $product->sku }}"
+                                                        required>
                                                     @error('sku')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -106,50 +270,9 @@
                                                     <label for="stock" class="form-label">Stock Quantity</label>
                                                     <input type="number"
                                                         class="form-control @error('stock') is-invalid @enderror"
-                                                        id="stock" name="stock"
-                                                        value="{{ old('stock', $product->stock) }}" min="0">
+                                                        id="stock" name="stock" min="0"
+                                                        value="{{ $product->stock }}">
                                                     @error('stock')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
-
-                                            <div class="row">
-                                                <div class="col-md-4 mb-3">
-                                                    <label for="purchase_price" class="form-label">Purchase Price
-                                                        (₦)</label>
-                                                    <input type="number" step="0.01"
-                                                        class="form-control @error('purchase_price') is-invalid @enderror"
-                                                        id="purchase_price" name="purchase_price"
-                                                        value="{{ old('purchase_price', $product->purchase_price) }}"
-                                                        min="0">
-                                                    @error('purchase_price')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-4 mb-3">
-                                                    <label for="selling_price" class="form-label">Selling Price (₦) <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="number" step="0.01"
-                                                        class="form-control @error('selling_price') is-invalid @enderror"
-                                                        id="selling_price" name="selling_price"
-                                                        value="{{ old('selling_price', $product->selling_price) }}"
-                                                        min="0" required>
-                                                    @error('selling_price')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-4 mb-3">
-                                                    <label for="discounted_price" class="form-label">Discounted Price
-                                                        (₦)</label>
-                                                    <input type="number" step="0.01"
-                                                        class="form-control @error('discounted_price') is-invalid @enderror"
-                                                        id="discounted_price" name="discounted_price"
-                                                        value="{{ old('discounted_price', $product->discounted_price) }}"
-                                                        min="0">
-                                                    @error('discounted_price')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
                                                 </div>
@@ -204,6 +327,23 @@
                                                         <div class="current-gallery mb-3">
                                                             <p class="text-muted mb-2">Current Gallery Images:</p>
                                                             <div class="row g-2" id="currentGallery">
+                                                                {{-- @foreach ($images as $index => $image)
+                                                                    <div class="col-lg-3 col-md-4 col-sm-6 current-gallery-item"
+                                                                        data-image-id="{{ $index }}">
+                                                                        <div class="position-relative"
+                                                                            id="image-{{ $index }}">
+                                                                            <img src="{{ $image }}"
+                                                                                alt="Gallery Image"
+                                                                                class="img-fluid rounded"
+                                                                                style="height: 100px; width: 100%; object-fit: cover;">
+                                                                            <div
+                                                                                class="position-absolute bottom-0 start-0 m-1">
+                                                                                <span
+                                                                                    class="badge bg-primary">{{ $index + 1 }}</span>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                @endforeach --}}
                                                                 @foreach ($images as $index => $image)
                                                                     <div class="col-lg-3 col-md-4 col-sm-6 current-gallery-item"
                                                                         data-image-id="{{ $index }}">
@@ -213,15 +353,14 @@
                                                                                 alt="Gallery Image"
                                                                                 class="img-fluid rounded"
                                                                                 style="height: 100px; width: 100%; object-fit: cover;">
-                                                                            {{-- <button type="button"
-                                                                                class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 delete-current-image"
-                                                                                data-image-id="{{ $index }}"
-                                                                                data-product-id="{{ $product->id }}"
-                                                                                data-image-index="{{ $index }}"
-                                                                                title="Delete Image"
-                                                                                style="width: 30px; height: 30px; padding: 0; font-size: 14px; border-radius: 50%;">
-                                                                                <i class="fas fa-trash"></i>
-                                                                            </button> --}}
+
+                                                                            <!-- Delete icon -->
+                                                                            <button type="button"
+                                                                                class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 delete-image-btn"
+                                                                                data-image-id="{{ $index }}">
+                                                                                <i class="fas fa-times"></i>
+                                                                            </button>
+
                                                                             <div
                                                                                 class="position-absolute bottom-0 start-0 m-1">
                                                                                 <span
@@ -230,22 +369,6 @@
                                                                         </div>
                                                                     </div>
                                                                 @endforeach
-                                                                {{-- @foreach ($images as $index => $image)
-                                                                    <div class="image-wrapper position-relative"
-                                                                        id="image-{{ $index }}">
-                                                                        <img src="{{ $image }}" class="img-fluid"
-                                                                            alt="Product Image">
-
-                                                                        <button type="button"
-                                                                            class="btn btn-danger btn-sm position-absolute top-0 end-0 m-1 delete-current-image"
-                                                                            data-product-id="{{ $product->id }}"
-                                                                            data-image-index="{{ $index }}"
-                                                                            title="Delete Image"
-                                                                            style="width: 30px; height: 30px; padding: 0; font-size: 14px; border-radius: 50%;">
-                                                                            <i class="fas fa-trash"></i>
-                                                                        </button>
-                                                                    </div>
-                                                                @endforeach --}}
 
                                                             </div>
                                                         </div>
@@ -364,19 +487,20 @@
                                             </div>
 
                                             <div class="mb-3">
-                                                <label for="vendor_id" class="form-label">Vendor</label>
-                                                <select id="vendor_id"
-                                                    class="form-select @error('vendor_id') is-invalid @enderror"
-                                                    name="vendor_id">
-                                                    <option value="">Select Vendor</option>
-                                                    @foreach ($vendors as $vendor)
-                                                        <option value="{{ $vendor->id }}"
-                                                            {{ old('vendor_id', $product->vendor_id) == $vendor->id ? 'selected' : '' }}>
-                                                            {{ $vendor->name }}
-                                                        </option>
-                                                    @endforeach
+                                                <label for="pinned" class="form-label">Pinned</label>
+                                                <select id="pinned"
+                                                    class="form-select @error('pinned') is-invalid @enderror"
+                                                    name="pinned">
+                                                    <option value="0"
+                                                        {{ old('pinned', $product->pinned ?? 0) == 0 ? 'selected' : '' }}>
+                                                        Inactive
+                                                    </option>
+                                                    <option value="1"
+                                                        {{ old('pinned', $product->pinned ?? 0) == 1 ? 'selected' : '' }}>
+                                                        Active
+                                                    </option>
                                                 </select>
-                                                @error('vendor_id')
+                                                @error('pinned')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
@@ -527,16 +651,63 @@
                                         </div>
                                     </div>
 
+                                    <div class="card mb-4">
+                                        <div class="card-header bg-light py-2">
+                                            <h6 class="mb-0"><i class="fas fa-share-alt me-1 text-primary"></i> QR CODE
+                                                FOR UNIQUE ID</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- QR Code Section -->
+                                            <div class="col-md-12 mb-12">
+                                                <div class="border rounded p-3 bg-light position-relative">
+                                                    <!-- position-relative for absolute icon -->
+                                                    <h6 class="text-muted mb-3">
+                                                        QR Code
+                                                        <a href="{{ route('barcode.download', ['uniqueId' => $product->unique_id, 'type' => 'qrcode']) }}"
+                                                            class="position-absolute top-0 end-0 m-2 text-primary"
+                                                            title="Download QR Code" style="font-size: 1.25rem;">
+                                                            <i class="fas fa-download"></i>
+                                                        </a>
+                                                    </h6>
+                                                    <div class="d-flex justify-content-center align-items-center mb-2">
+                                                        {!! DNS2D::getBarcodeHTML($product->unique_id, 'QRCODE') !!}
+                                                    </div>
+                                                    <small class="text-secondary">ID: {{ $product->unique_id }}</small>
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <!-- Barcode Section -->
+                                            <div class="col-md-12 mb-12">
+                                                <div class="border rounded p-3 bg-light position-relative">
+                                                    <!-- position-relative for absolute icon -->
+                                                    <h6 class="text-muted mb-3">
+                                                        Barcode
+                                                        <a href="{{ route('barcode.download', ['uniqueId' => $product->unique_id, 'type' => 'barcode']) }}"
+                                                            class="position-absolute top-0 end-0 m-2 text-primary"
+                                                            title="Download Barcode" style="font-size: 1.25rem;">
+                                                            <i class="fas fa-download"></i>
+                                                        </a>
+                                                    </h6>
+                                                    <div class="d-flex justify-content-center align-items-center mb-2">
+                                                        {!! DNS1D::getBarcodeHTML($product->unique_id, 'PHARMA') !!}
+                                                    </div>
+                                                    <small class="text-secondary">ID: {{ $product->unique_id }}</small>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+
                                     <!-- Actions -->
                                     <div class="card mb-4">
                                         <div class="card-body">
                                             <div class="d-grid gap-2">
-                                                <button type="submit" class="btn btn-primary btn-lg">
-                                                    <i class="fas fa-save me-1"></i> Update Product
+                                                <button type="submit" class="btn btn-success btn-lg">
+                                                    <i class="fas fa-check-circle me-1"></i> Update Product
                                                 </button>
                                                 <a href="{{ route('products.index') }}"
                                                     class="btn btn-outline-secondary">
-                                                    <i class="fas fa-arrow-left me-1"></i> Back to Products
+                                                    <i class="fas fa-times me-1"></i> Cancel
                                                 </a>
                                             </div>
                                         </div>
@@ -550,7 +721,189 @@
         </div>
     </div>
 @endsection
+@section('scripts')
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const galleryContainer = document.getElementById('currentGallery');
 
+            galleryContainer.addEventListener('click', function(event) {
+                const deleteBtn = event.target.closest('.delete-image-btn');
+                if (!deleteBtn) return;
+
+                const imageId = deleteBtn.dataset.imageId;
+                const imageElement = document.getElementById('image-' + imageId);
+
+                if (imageElement) {
+                    // Get the image URL
+                    const img = imageElement.querySelector('img');
+                    const imageUrl = img ? img.src : null;
+
+                    console.log('Image URL to delete:', imageUrl);
+
+                    // Remove the image container
+                    imageElement.closest('.current-gallery-item').remove();
+
+                    // Optional: Track removed images for server processing
+                    const removedImagesContainer = document.getElementById('removedImages');
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'removed_images[]';
+                    input.value = imageUrl; // You can save URL or ID as needed
+                    removedImagesContainer.appendChild(input);
+                }
+            });
+        });
+    </script> --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const productId = {{ $product->id }};
+
+            const galleryContainer = document.getElementById('currentGallery');
+
+            galleryContainer.addEventListener('click', async function(event) {
+                const deleteBtn = event.target.closest('.delete-image-btn');
+                if (!deleteBtn) return;
+
+                const imageId = deleteBtn.dataset.imageId;
+                const imageElement = document.getElementById('image-' + imageId);
+
+                if (imageElement) {
+                    const img = imageElement.querySelector('img');
+                    const imageUrl = img ? img.src : null;
+
+                    if (!imageUrl) return;
+
+                    console.log('Deleting image URL:', imageUrl);
+
+                    try {
+                        // Send DELETE request to API
+                        const response = await fetch(`/api/products/${productId}/images`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                // Add CSRF token header if needed (for web routes)
+                                // 'X-CSRF-TOKEN': csrfToken,
+                            },
+                            body: JSON.stringify({
+                                image_url: imageUrl
+                            }),
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok) {
+                            alert(data.error || 'Failed to delete image');
+                            return;
+                        }
+
+                        // Success: remove image from DOM
+                        imageElement.closest('.current-gallery-item').remove();
+
+                        // Optionally update your UI or form inputs here
+                        console.log('Image deleted:', data);
+
+                    } catch (error) {
+                        console.error('Error deleting image:', error);
+                        alert('An error occurred while deleting the image.');
+                    }
+                }
+            });
+        });
+    </script>
+
+    <script>
+        const timestamp = Date.now(); // e.g., 1693456789012
+        const lastSixDigits = String(timestamp).slice(-6); // Get last 6 digits as a string
+        document.getElementById('sku').value = 'SEC' + lastSixDigits;
+        const timestamp2 = Date.now(); // e.g., 1693456789012
+        const lastSixDigits2 = String(timestamp2).slice(-6); // Get last 6 digits as a string
+        document.getElementById('unique_id').value = lastSixDigits2;
+    </script>
+
+    <script>
+        function parseMoney(value) {
+            const n = parseFloat(value);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function calculateFinalPrice() {
+            const purchasePrice = parseMoney(document.getElementById('purchase_price').value);
+            const profitAmount = parseMoney(document.getElementById('profit_amount').value);
+            const discountAmount = parseMoney(document.getElementById('discount_amount').value);
+
+            const finalPrice = purchasePrice + profitAmount - discountAmount;
+            document.getElementById('selling_price').value = finalPrice >= 0 ? finalPrice.toFixed(2) : '0.00';
+        }
+
+        // Attach 'input' event listeners to trigger calculation on each input change
+        ['purchase_price', 'profit_amount', 'discount_amount'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calculateFinalPrice);
+        });
+
+        // Optionally, calculate initial value on page load
+        calculateFinalPrice();
+    </script>
+
+    <script>
+        document.getElementById('vendor_id').addEventListener('change', function() {
+            const vendorId = this.value;
+
+            fetch(`/api/vendor-prices/${vendorId}`)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.success && res.data) {
+                        const data = res.data;
+
+                        // Populate fields
+                        document.getElementById('parking_display').innerText = `₹${data.parking_charges}`;
+                        document.getElementById('operational_display').innerText =
+                            `₹${data.operational_charges}`;
+                        document.getElementById('transport_display').innerText = `₹${data.transport}`;
+                        document.getElementById('deadstock_display').innerText = `₹${data.dead_stock}`;
+                        document.getElementById('branding_display').innerText = `₹${data.branding}`;
+                        document.getElementById('damage_display').innerText = `₹${data.damage_and_shrinkege}`;
+                        document.getElementById('profit_display').innerText = `₹${data.profit}`;
+                        document.getElementById('total_vendor_charges_display').innerText =
+                            `₹${data.total_charges}`;
+                        document.getElementById('purchase_price').value = data.total_charges;
+
+                        const profitAmount = parseMoney(document.getElementById('profit_amount').value);
+                        const discountAmount = parseMoney(document.getElementById('discount_amount').value);
+                        const vendorCharges = parseMoney(data.total_charges);
+
+                        const finalPrice = vendorCharges + profitAmount - discountAmount;
+
+                        // Ensure non-negative and format to 2 decimal places
+                        document.getElementById('selling_price').value = finalPrice >= 0 ? finalPrice.toFixed(
+                            2) : '0.00';
+
+                        // Show the breakdown section
+                        document.getElementById('vendor_charges_breakdown').style.display = 'block';
+                    } else {
+                        // Hide the breakdown section
+                        document.getElementById('vendor_charges_breakdown').style.display = 'none';
+
+                        // Show error alert
+                        alert('Unable to fetch vendor charges. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+
+                    // Hide the breakdown section
+                    document.getElementById('vendor_charges_breakdown').style.display = 'none';
+
+                    // Show error alert
+                    alert('An error occurred while fetching vendor data.');
+                });
+        });
+    </script>
+
+
+
+@endsection
 @push('styles')
     <style>
         /* Original Styles */

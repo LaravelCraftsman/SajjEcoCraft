@@ -53,6 +53,28 @@
                                                     @enderror
                                                 </div>
                                             </div>
+                                            <div class="row">
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="unique_id" class="form-label">Unique Id</label>
+                                                    <input type="text"
+                                                        class="form-control @error('unique_id') is-invalid @enderror"
+                                                        id="unique_id" name="unique_id" value="{{ old('unique_id') }}"
+                                                        required>
+                                                    @error('unique_id')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+
+                                                <div class="col-md-6 mb-3">
+                                                    <label for="size" class="form-label">Size</label>
+                                                    <textarea class="form-control @error('size') is-invalid @enderror" id="size" name="size" rows="3">{{ old('size') }}</textarea>
+
+                                                    @error('size')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+
+                                            </div>
 
                                             <div class="mb-3">
                                                 <label for="short_description" class="form-label">Short Description</label>
@@ -81,13 +103,150 @@
                                                 Inventory</h6>
                                         </div>
                                         <div class="card-body">
+                                            <div class="mb-3">
+                                                <label for="vendor_id" class="form-label">Vendor</label>
+                                                <select id="vendor_id"
+                                                    class="form-select @error('vendor_id') is-invalid @enderror"
+                                                    name="vendor_id">
+                                                    <option value="">Select Vendor</option>
+                                                    @foreach ($vendors as $vendor)
+                                                        <option value="{{ $vendor->id }}"
+                                                            data-parking="{{ $vendor->parking_charges ?? 0 }}"
+                                                            data-operational="{{ $vendor->operational_charges ?? 0 }}"
+                                                            data-transport="{{ $vendor->transport ?? 0 }}"
+                                                            data-deadstock="{{ $vendor->dead_stock ?? 0 }}"
+                                                            data-branding="{{ $vendor->branding ?? 0 }}"
+                                                            data-damage="{{ $vendor->damage_and_shrinkege ?? 0 }}"
+                                                            data-profit="{{ $vendor->profit ?? 0 }}"
+                                                            {{ old('vendor_id') == $vendor->id ? 'selected' : '' }}>
+                                                            {{ $vendor->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                @error('vendor_id')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+
+                                            <!-- Vendor Charges Breakdown (Hidden by default) -->
+                                            <div class="row" id="vendor_charges_breakdown" style="display: none;">
+                                                <div class="col-12">
+                                                    <div class="card bg-light border-0 mt-3">
+                                                        <div class="card-header bg-transparent py-2">
+                                                            <h6 class="mb-0 text-muted">
+                                                                <i class="fas fa-calculator me-1"></i>
+                                                                Vendor Charges Breakdown
+                                                            </h6>
+                                                        </div>
+                                                        <div class="card-body py-2">
+                                                            <div class="row g-2 text-sm">
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Parking:</small>
+                                                                    <div class="fw-bold" id="parking_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Operational:</small>
+                                                                    <div class="fw-bold" id="operational_display">₹0
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Transport:</small>
+                                                                    <div class="fw-bold" id="transport_display">₹0
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Dead Stock:</small>
+                                                                    <div class="fw-bold" id="deadstock_display">₹0
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Branding:</small>
+                                                                    <div class="fw-bold" id="branding_display">₹0
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Damage:</small>
+                                                                    <div class="fw-bold" id="damage_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-2">
+                                                                    <small class="text-muted">Profit:</small>
+                                                                    <div class="fw-bold" id="profit_display">₹0</div>
+                                                                </div>
+                                                                <div class="col-md-4">
+                                                                    <small class="text-muted">Total Vendor
+                                                                        Charges:</small>
+                                                                    <div class="fw-bold text-primary"
+                                                                        id="total_vendor_charges_display">₹0</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            <br>
+                                            <!-- Hidden field to store vendor charges -->
+                                            <input type="hidden" id="vendor_charges" name="vendor_charges"
+                                                value="0">
+
+                                            <div class="row">
+                                                <div class="col-md-4 mb-4">
+                                                    <label for="purchase_price" class="form-label">Purchase Price
+                                                        (₹) <span class="text-danger">*</span></label>
+                                                    <input type="number" step="0.01"
+                                                        class="form-control @error('purchase_price') is-invalid @enderror"
+                                                        id="purchase_price" name="purchase_price"
+                                                        value="{{ old('purchase_price', 0) }}" min="0"
+                                                        oninput="calculateFinalPrice()" required>
+                                                    @error('purchase_price')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+
+                                                <div class="col-md-4 mb-4">
+                                                    <label for="profit_amount" class="form-label">Profit (₹)</label>
+                                                    <input type="number" step="0.01" class="form-control"
+                                                        id="profit_amount" name="profit_amount" value="0"
+                                                        oninput="calculateFinalPrice()">
+                                                    <div class="form-text">Additional profit amount</div>
+                                                </div>
+
+                                                <div class="col-md-4 mb-4">
+                                                    <label for="discount_amount" class="form-label">Discount
+                                                        (₹)</label>
+                                                    <input type="number" step="0.01" class="form-control"
+                                                        id="discount_amount" name="discount_amount" value="0"
+                                                        oninput="calculateFinalPrice()">
+                                                    <div class="form-text">Discount amount</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="row">
+                                                <div class="col-md-12 mb-12">
+                                                    <label for="selling_price" class="form-label">Final Selling Price
+                                                        (₹)
+                                                        <span class="text-danger">*</span></label>
+                                                    <input type="number" step="0.01"
+                                                        class="form-control @error('selling_price') is-invalid @enderror"
+                                                        id="selling_price" name="selling_price"
+                                                        value="{{ old('selling_price', 0) }}" min="0" readonly
+                                                        style="background-color: #e3f2fd; font-weight: bold;" required>
+                                                    <div class="form-text">Auto-calculated: Purchase Price +
+                                                        Vendor Charges + Profit - Discount</div>
+                                                    @error('selling_price')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
+                                                </div>
+                                            </div>
+                                            <br>
                                             <div class="row">
                                                 <div class="col-md-6 mb-3">
                                                     <label for="sku" class="form-label">SKU <span
                                                             class="text-danger">*</span></label>
                                                     <input type="text"
                                                         class="form-control @error('sku') is-invalid @enderror"
-                                                        id="sku" name="sku" value="{{ old('sku') }}" required>
+                                                        id="sku" name="sku" value="{{ old('sku') }}"
+                                                        required>
                                                     @error('sku')
                                                         <div class="invalid-feedback">{{ $message }}</div>
                                                     @enderror
@@ -104,51 +263,14 @@
                                                     @enderror
                                                 </div>
                                             </div>
-
-                                            <div class="row">
-                                                <div class="col-md-4 mb-3">
-                                                    <label for="purchase_price" class="form-label">Purchase Price
-                                                        (₦)</label>
-                                                    <input type="number" step="0.01"
-                                                        class="form-control @error('purchase_price') is-invalid @enderror"
-                                                        id="purchase_price" name="purchase_price"
-                                                        value="{{ old('purchase_price', 0) }}" min="0">
-                                                    @error('purchase_price')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-4 mb-3">
-                                                    <label for="selling_price" class="form-label">Selling Price (₦) <span
-                                                            class="text-danger">*</span></label>
-                                                    <input type="number" step="0.01"
-                                                        class="form-control @error('selling_price') is-invalid @enderror"
-                                                        id="selling_price" name="selling_price"
-                                                        value="{{ old('selling_price', 0) }}" min="0" required>
-                                                    @error('selling_price')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-
-                                                <div class="col-md-4 mb-3">
-                                                    <label for="discounted_price" class="form-label">Discounted Price
-                                                        (₦)</label>
-                                                    <input type="number" step="0.01"
-                                                        class="form-control @error('discounted_price') is-invalid @enderror"
-                                                        id="discounted_price" name="discounted_price"
-                                                        value="{{ old('discounted_price') }}" min="0">
-                                                    @error('discounted_price')
-                                                        <div class="invalid-feedback">{{ $message }}</div>
-                                                    @enderror
-                                                </div>
-                                            </div>
                                         </div>
                                     </div>
 
                                     <!-- Enhanced Media Section -->
                                     <div class="card mb-4">
                                         <div class="card-header bg-light py-2">
-                                            <h6 class="mb-0"><i class="fas fa-images me-1 text-primary"></i> Media</h6>
+                                            <h6 class="mb-0"><i class="fas fa-images me-1 text-primary"></i> Media
+                                            </h6>
                                         </div>
                                         <div class="card-body">
                                             <div class="row">
@@ -193,9 +315,11 @@
                                                             <div class="drop-zone-content text-center py-4">
                                                                 <i
                                                                     class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
-                                                                <h5 class="text-muted">Drop images here or click to browse
+                                                                <h5 class="text-muted">Drop images here or click to
+                                                                    browse
                                                                 </h5>
-                                                                <p class="text-muted mb-0">Supports: JPG, PNG, GIF, WebP
+                                                                <p class="text-muted mb-0">Supports: JPG, PNG, GIF,
+                                                                    WebP
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -243,7 +367,8 @@
                                     <!-- Status & Categories -->
                                     <div class="card mb-4">
                                         <div class="card-header bg-light py-2">
-                                            <h6 class="mb-0"><i class="fas fa-cog me-1 text-primary"></i> Settings</h6>
+                                            <h6 class="mb-0"><i class="fas fa-cog me-1 text-primary"></i> Settings
+                                            </h6>
                                         </div>
                                         <div class="card-body">
                                             <div class="mb-3">
@@ -254,7 +379,8 @@
                                                         {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive
                                                     </option>
                                                     <option value="active"
-                                                        {{ old('status') == 'active' ? 'selected' : '' }}>Active</option>
+                                                        {{ old('status') == 'active' ? 'selected' : '' }}>Active
+                                                    </option>
                                                     <option value="draft"
                                                         {{ old('status') == 'draft' ? 'selected' : '' }}>Draft</option>
                                                 </select>
@@ -281,21 +407,20 @@
                                             </div>
 
                                             <div class="mb-3">
-                                                <label for="vendor_id" class="form-label">Vendor</label>
-                                                <select id="vendor_id"
-                                                    class="form-select @error('vendor_id') is-invalid @enderror"
-                                                    name="vendor_id">
-                                                    <option value="">Select Vendor</option>
-                                                    @foreach ($vendors as $vendor)
-                                                        <option value="{{ $vendor->id }}"
-                                                            {{ old('vendor_id') == $vendor->id ? 'selected' : '' }}>
-                                                            {{ $vendor->name }}</option>
-                                                    @endforeach
+                                                <label for="pinned" class="form-label">Pinned</label>
+                                                <select id="pinned"
+                                                    class="form-select @error('pinned') is-invalid @enderror"
+                                                    name="pinned">
+                                                    <option value="0" {{ old('pinned') == '0' ? 'selected' : '' }}>
+                                                        Inactive</option>
+                                                    <option value="1" {{ old('pinned') == '1' ? 'selected' : '' }}>
+                                                        Active</option>
                                                 </select>
-                                                @error('vendor_id')
+                                                @error('pinned')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>
+
                                         </div>
                                     </div>
 
@@ -307,7 +432,8 @@
                                         </div>
                                         <div class="card-body">
                                             <div class="mb-3">
-                                                <label for="meta_description" class="form-label">Meta Description</label>
+                                                <label for="meta_description" class="form-label">Meta
+                                                    Description</label>
                                                 <textarea class="form-control @error('meta_description') is-invalid @enderror" id="meta_description"
                                                     name="meta_description" rows="2">{{ old('meta_description') }}</textarea>
                                                 @error('meta_description')
@@ -332,7 +458,8 @@
                                     <!-- Social Media -->
                                     <div class="card mb-4">
                                         <div class="card-header bg-light py-2">
-                                            <h6 class="mb-0"><i class="fas fa-share-alt me-1 text-primary"></i> Social
+                                            <h6 class="mb-0"><i class="fas fa-share-alt me-1 text-primary"></i>
+                                                Social
                                                 Media</h6>
                                         </div>
                                         <div class="card-body">
@@ -683,11 +810,124 @@
             margin-right: 1rem;
             cursor: pointer;
         }
+
+        /* Price calculation styling */
+        .price-calculation-row {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .vendor-charges-breakdown {
+            font-size: 0.85rem;
+        }
+
+        .vendor-charges-breakdown .fw-bold {
+            color: #495057;
+        }
     </style>
 @endpush
 
+@section('scripts')
+
+    <script>
+        const timestamp = Date.now(); // e.g., 1693456789012
+        const lastSixDigits = String(timestamp).slice(-6); // Get last 6 digits as a string
+        document.getElementById('sku').value = 'SEC' + lastSixDigits;
+        const timestamp2 = Date.now(); // e.g., 1693456789012
+        const lastSixDigits2 = String(timestamp2).slice(-6); // Get last 6 digits as a string
+        document.getElementById('unique_id').value = lastSixDigits2;
+    </script>
+
+    <script>
+        function parseMoney(value) {
+            const n = parseFloat(value);
+            return isNaN(n) ? 0 : n;
+        }
+
+        function calculateFinalPrice() {
+            const purchasePrice = parseMoney(document.getElementById('purchase_price').value);
+            const profitAmount = parseMoney(document.getElementById('profit_amount').value);
+            const discountAmount = parseMoney(document.getElementById('discount_amount').value);
+
+            const finalPrice = purchasePrice + profitAmount - discountAmount;
+            document.getElementById('selling_price').value = finalPrice >= 0 ? finalPrice.toFixed(2) : '0.00';
+        }
+
+        // Attach 'input' event listeners to trigger calculation on each input change
+        ['purchase_price', 'profit_amount', 'discount_amount'].forEach(id => {
+            document.getElementById(id).addEventListener('input', calculateFinalPrice);
+        });
+
+        // Optionally, calculate initial value on page load
+        calculateFinalPrice();
+    </script>
+
+    <script>
+        document.getElementById('vendor_id').addEventListener('change', function() {
+            const vendorId = this.value;
+
+            fetch(`/api/vendor-prices/${vendorId}`)
+                .then(response => response.json())
+                .then(res => {
+                    if (res.success && res.data) {
+                        const data = res.data;
+
+                        // Populate fields
+                        document.getElementById('parking_display').innerText = `₹${data.parking_charges}`;
+                        document.getElementById('operational_display').innerText =
+                            `₹${data.operational_charges}`;
+                        document.getElementById('transport_display').innerText = `₹${data.transport}`;
+                        document.getElementById('deadstock_display').innerText = `₹${data.dead_stock}`;
+                        document.getElementById('branding_display').innerText = `₹${data.branding}`;
+                        document.getElementById('damage_display').innerText = `₹${data.damage_and_shrinkege}`;
+                        document.getElementById('profit_display').innerText = `₹${data.profit}`;
+                        document.getElementById('total_vendor_charges_display').innerText =
+                            `₹${data.total_charges}`;
+                        document.getElementById('purchase_price').value = data.total_charges;
+
+                        const profitAmount = parseMoney(document.getElementById('profit_amount').value);
+                        const discountAmount = parseMoney(document.getElementById('discount_amount').value);
+                        const vendorCharges = parseMoney(data.total_charges);
+
+                        const finalPrice = vendorCharges + profitAmount - discountAmount;
+
+                        // Ensure non-negative and format to 2 decimal places
+                        document.getElementById('selling_price').value = finalPrice >= 0 ? finalPrice.toFixed(
+                            2) : '0.00';
+
+                        // Show the breakdown section
+                        document.getElementById('vendor_charges_breakdown').style.display = 'block';
+                    } else {
+                        // Hide the breakdown section
+                        document.getElementById('vendor_charges_breakdown').style.display = 'none';
+
+                        // Show error alert
+                        alert('Unable to fetch vendor charges. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('API Error:', error);
+
+                    // Hide the breakdown section
+                    document.getElementById('vendor_charges_breakdown').style.display = 'none';
+
+                    // Show error alert
+                    alert('An error occurred while fetching vendor data.');
+                });
+        });
+    </script>
+
+
+
+@endsection
+
 @push('scripts')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+
+
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             let galleryImages = [];
@@ -924,7 +1164,7 @@
                 }
             });
 
-            // Main image preview (keeping your existing functionality)
+            // Main image preview
             document.getElementById('main_image').addEventListener('change', function(e) {
                 const file = e.target.files[0];
                 if (file) {
@@ -948,16 +1188,6 @@
                         .replace(/[\s_-]+/g, '-')
                         .replace(/^-+|-+$/g, '');
                     document.getElementById('slug').value = slug;
-                }
-            });
-
-            // Calculate discounted price if selling price changes
-            document.getElementById('selling_price').addEventListener('blur', function() {
-                const sellingPrice = parseFloat(this.value) || 0;
-                const discountedPrice = parseFloat(document.getElementById('discounted_price').value) || 0;
-
-                if (discountedPrice > sellingPrice) {
-                    document.getElementById('discounted_price').value = sellingPrice;
                 }
             });
         });

@@ -114,32 +114,46 @@ class CategoryController extends Controller {
 
 
     public function downloadPdf($id) {
-    $category = Category::with('products' )->findOrFail( $id );
-    $logo = SiteSettings::findOrFail(1)->logo_dark_image;
-        // dd($logo);
-        $products = $category->products;
+ // Get category and products
+    $category = Category::with('products')->findOrFail($id);
+    $products = $category->products;
 
-        $html = View::make('pdf.products', compact('products','logo'))->render();
+    // Get logo from settings
+    $siteSettings = SiteSettings::findOrFail(1);
+    $logoUrl = $siteSettings->logo_dark_image;
 
-        // Create mPDF instance
-        $mpdf = new Mpdf([
-            'mode' => 'utf-8',
-            'format' => 'A4',
-        ]);
+    // Convert logo URL to absolute path for mPDF
+    if (filter_var($logoUrl, FILTER_VALIDATE_URL)) {
+        // Extract the path after domain and prepend the public path
+        $logoPath = public_path(parse_url($logoUrl, PHP_URL_PATH));
+    } else {
+        // If it's already a relative path, just point to public folder
+        $logoPath = public_path($logoUrl);
+    }
 
-        // Set default font if needed (e.g. for Unicode)
-        $mpdf->SetFont('dejavusans');
+    // Check if file exists, fallback if not
+    if (!file_exists($logoPath)) {
+        $logoPath = public_path('default-logo.png'); // Optional fallback
+    }
+    $categoryName = $category->name;
+    // Load Blade view as HTML
+    $html = View::make('pdf.products', compact('products', 'logoPath','categoryName'))->render();
 
-        // Write the HTML
-        $mpdf->WriteHTML($html);
+    // Create mPDF instance with remote images enabled
+    $mpdf = new Mpdf([
+        'mode' => 'utf-8',
+        'format' => 'A4',
+    ]);
+    $mpdf->showImageErrors = true; // Debug image loading
+    $mpdf->SetFont('dejavusans');  // Supports UTF-8 characters
 
-return response($mpdf->Output('', 'S'), 200)
-    ->header('Content-Type', 'application/pdf')
-    ->header(
-        'Content-Disposition',
-        'inline; filename="products.pdf"'
-    );
+    // Write the Blade-rendered HTML
+    $mpdf->WriteHTML($html);
 
+    // Return the PDF response inline
+    return response($mpdf->Output('', 'S'), 200)
+        ->header('Content-Type', 'application/pdf')
+        ->header('Content-Disposition', 'inline; filename="products.pdf"');
     }
 
 }

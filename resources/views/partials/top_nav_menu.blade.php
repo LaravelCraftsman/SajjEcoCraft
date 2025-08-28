@@ -13,7 +13,7 @@
         <a class="dropdown-item" href="{{ route('blogs.index') }}">Blogs</a>
         <a class="dropdown-item" href="{{ route('faqs.index') }}">FAQ</a>
         <a class="dropdown-item" href="{{ route('banners') }}">Banners</a>
-        <a class="dropdown-item" href="{{ route('about_us') }}">About Us</a>
+        <a class="dropdown-item" href="{{ route('admin.about_us') }}">About Us</a>
         <a class="dropdown-item" href="{{ route('coupons.index') }}">Coupons</a>
         <a class="dropdown-item" href="{{ route('contactRequests.index') }}">Contact
             Request</a>
@@ -52,7 +52,7 @@
     </a>
 
     <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-        <a class="dropdown-item" href="#">Invoice</a>
-        <a class="dropdown-item" href="#">Quotation</a>
+        <a class="dropdown-item" href="{{ route('invoices.index') }}">Invoice</a>
+        <a class="dropdown-item" href="{{ route('quotations.index') }}">Quotation</a>
     </div>
 </li>

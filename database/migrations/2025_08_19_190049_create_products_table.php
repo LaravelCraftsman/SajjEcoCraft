@@ -21,14 +21,19 @@ return new class extends Migration
             $table->string('slug')->unique();
             $table->longText('description')->nullable();
             $table->text('short_description')->nullable();
+            $table->text('unique_id')->nullable();
+            $table->boolean('pinned')->nullable();
+            $table->text('size')->nullable();
+
 
             // Inventory & Pricing
             $table->string('sku')->unique();
             $table->enum('status', ['active', 'inactive', 'draft'])->default('inactive');
             $table->integer('stock')->nullable();
             $table->decimal('purchase_price', 10, 2)->default(0);
+            $table->decimal('profit', 10, 2)->default(0);
+            $table->decimal('discount', 10, 2)->default(0);
             $table->decimal('selling_price', 10, 2)->default(0);
-            $table->decimal('discounted_price', 10, 2)->nullable();
 
             // Relationships
             $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');

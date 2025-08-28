@@ -16,6 +16,6 @@ class AboutUsController extends Controller {
         $description->description = $request->input( 'description' );
         $description->save();
 
-        return redirect()->route( 'about_us' )->with( 'status', 'About description updated successfully.' );
+        return redirect()->route( 'admin.about_us' )->with( 'status', 'About description updated successfully.' );
     }
 }

@@ -35,9 +35,10 @@ class CouponController extends Controller {
     */
 
     public function store( Request $request ) {
+        // dd( $request );
         $request->validate( [
             'code'        => 'required|string|max:50|unique:coupons,code',
-            'type'        => 'required|in:fixed,percent',
+            'type'        => 'required|in:fixed,percentage',
             'discount'    => 'required|numeric|min:0',
             'expires_at'  => 'nullable|date|after_or_equal:today',
             'usage_limit' => 'nullable|integer|min:1',
@@ -89,7 +90,7 @@ class CouponController extends Controller {
 
         $request->validate( [
             'code'        => "required|string|max:50|unique:coupons,code,$id",
-            'type'        => 'required|in:fixed,percent',
+            'type'        => 'required|in:fixed,percentage',
             'discount'    => 'required|numeric|min:0',
             'expires_at'  => 'nullable|date|after_or_equal:today',
             'usage_limit' => 'nullable|integer|min:1',

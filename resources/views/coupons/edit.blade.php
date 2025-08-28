@@ -22,8 +22,10 @@
                     <div class="mb-3">
                         <label class="form-label">Type <span class="text-danger">*</span></label>
                         <select name="type" class="form-select @error('type') is-invalid @enderror" required>
-                            <option value="fixed" {{ old('type', $coupon->type) == 'fixed' ? 'selected' : '' }}>Fixed</option>
-                            <option value="percent" {{ old('type', $coupon->type) == 'percent' ? 'selected' : '' }}>Percent
+                            <option value="fixed" {{ old('type', $coupon->type) == 'fixed' ? 'selected' : '' }}>Fixed
+                            </option>
+                            <option value="percentage" {{ old('type', $coupon->type) == 'percentage' ? 'selected' : '' }}>
+                                Percentage
                             </option>
                         </select>
                         @error('type')

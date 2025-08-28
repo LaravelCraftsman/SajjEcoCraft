@@ -28,10 +28,11 @@
                             <tbody>
                                 @foreach ($coupons as $coupon)
                                     <tr>
-                                        <td>{{ $loop->iteration + ($coupons->currentPage() - 1) * $coupons->perPage() }}</td>
+                                        <td>{{ $loop->iteration + ($coupons->currentPage() - 1) * $coupons->perPage() }}
+                                        </td>
                                         <td>{{ $coupon->code }}</td>
                                         <td>{{ ucfirst($coupon->type) }}</td>
-                                        <td>{{ $coupon->discount }}{{ $coupon->type === 'percent' ? '%' : '' }}</td>
+                                        <td>{{ $coupon->discount }}{{ $coupon->type === 'percentage' ? '%' : '' }}</td>
                                         <td>{{ optional($coupon->expires_at)->format('d M Y') ?? '-' }}</td>
                                         <td>{{ $coupon->times_used }} / {{ $coupon->usage_limit ?? '∞' }}</td>
                                         <td><x-table-actions route="coupons" :id="$coupon->id" /></td>

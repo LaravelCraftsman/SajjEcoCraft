@@ -22,7 +22,8 @@
                         <label class="form-label">Type <span class="text-danger">*</span></label>
                         <select name="type" class="form-select @error('type') is-invalid @enderror" required>
                             <option value="fixed" {{ old('type') == 'fixed' ? 'selected' : '' }}>Fixed</option>
-                            <option value="percent" {{ old('type') == 'percent' ? 'selected' : '' }}>Percent</option>
+                            <option value="percentage" {{ old('type') == 'percentage' ? 'selected' : '' }}>percentage
+                            </option>
                         </select>
                         @error('type')
                             <div class="invalid-feedback">{{ $message }}</div>
